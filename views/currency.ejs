@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heaviest Cats</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <%- include('partials/navbar', { user }) %>
+    <h2>Heaviest Cat Breeds</h2>
+    
+    <button id="heaviestCatsButton">Show Heaviest Cats</button>
+    <canvas id="catsChart" width="400" height="200"></canvas>
+    
+
+
+
+    <h2>Random Cat Image</h2>
+    <button id="randomCatButton">Show Random Cat</button>
+    <div id="catImageContainer" style="margin-top: 20px;">
+        <img id="catImage" src="" alt="Random Cat" style="max-width: 50%; height: auto; display: none;">
+    </div>
+
+    <footer>Tolkyn Zharkenova, BDA-2305</footer>
+
+    <script>
+        const heaviestCatsButton = document.getElementById('heaviestCatsButton');
+        const catsChartCanvas = document.getElementById('catsChart').getContext('2d');
+        let chart;
+
+        heaviestCatsButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/heaviest-cats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (chart) chart.destroy(); 
+
+                chart = new Chart(catsChartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(breed => breed.name),
+                        datasets: [{
+                            label: 'Weight (kg)',
+                            data: data.map(breed => breed.avgWeight),
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching cat breed data:', error);
+            }
+        });
+
+
+        const randomCatButton = document.getElementById('randomCatButton');
+        const catImage = document.getElementById('catImage');
+
+        randomCatButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/random-cat');
+                const data = await response.json();
+                if (data.imageUrl) {
+                    catImage.src = data.imageUrl;
+                    catImage.style.display = 'block';
+                } else {
+                    console.error('No image found');
+                }
+            } catch (error) {
+                console.error('Error fetching random cat image:', error);
+            }
+        });
+    </script>
+</body>
+</html>

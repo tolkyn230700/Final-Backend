@@ -1,0 +1,40 @@
+<nav>
+  <ul>
+    <% if (user) { %>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/currency">Cat info</a></li>
+      <li><a href="/news">News</a></li>
+      <li><a href="/register">Logout</a></li>
+    <% } else { %>
+      <li><a href="/register">Register</a></li>
+      <li><a href="/login">Login</a></li>
+    <% } %>
+  </ul>
+</nav>
+
+<style>
+  nav {
+    background-color: hsl(229, 68%, 15%);
+    padding: 20px;
+  }
+  nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  nav ul li {
+    margin-right: 15px;
+  }
+  nav ul li a {
+    text-decoration: none;
+    color: white;
+    padding: 2px 10px;
+    background-color: hsl(229, 68%, 15%);
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  nav ul li a:hover {
+    background-color: hsl(217, 74%, 45%);
+  }
+</style>

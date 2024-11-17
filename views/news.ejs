@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <%- include('partials/navbar', { user }) %>
+    
+    <h2>News Analytics</h2>
+
+    <form id="filterForm">
+        <label for="category">Category:</label>
+        <select id="category" name="category">
+            <option value="business">Business</option>
+            <option value="technology">Technology</option>
+            <option value="sports">Sports</option>
+            <option value="health">Health</option>
+        </select>
+
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" required>
+
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" required>
+
+        <button type="submit">Generate Graph</button>
+    </form>
+
+    <canvas id="newsChart" width="400" height="200"></canvas>
+
+    <h1>Recent News</h1>
+    <div id="newsContainer" class="news-container">
+        <p>Loading news...</p>
+    </div>
+    <footer>Tolkyn Zharkenova, BDA-2305</footer>
+
+    <script>
+        const filterForm = document.getElementById('filterForm');
+        const newsChart = document.getElementById('newsChart').getContext('2d');
+        const newsContainer = document.getElementById('newsContainer');
+
+        let chart;
+
+        async function loadRecentNews(category) {
+            try {
+                const response = await fetch(`/api/recent-news?category=${category}`);
+                const news = await response.json();
+
+                if (!Array.isArray(news)) throw new Error('Invalid response format.');
+
+                newsContainer.innerHTML = '';
+                if (news.length === 0) {
+                    newsContainer.innerHTML = '<p>No news available for the selected category.</p>';
+                    return;
+                }
+
+                news.forEach(article => {
+                    const newsItem = document.createElement('div');
+                    newsItem.classList.add('news-item');
+
+                    newsItem.innerHTML = `
+                        <img src="${article.urlToImage || '/default-image.jpg'}" alt="News Image" class="news-image">
+                        <h4><a href="${article.url}" target="_blank">${article.title}</a></h4>
+                        <p>${article.description || 'No description available.'}</p>
+                        <small>Published on: ${new Date(article.publishedAt).toLocaleDateString()}</small>
+                    `;
+
+                    newsContainer.appendChild(newsItem);
+                });
+            } catch (error) {
+                console.error('Error loading recent news:', error);
+                newsContainer.innerHTML = '<p>Failed to load news. Please try again later.</p>';
+            }
+        }
+
+        filterForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const formData = new FormData(filterForm);
+            const category = formData.get('category');
+            const startDate = formData.get('startDate');
+            const endDate = formData.get('endDate');
+
+            try {
+                const response = await fetch('/api/news', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, startDate, endDate })
+                });
+
+                const data = await response.json();
+
+                if (chart) chart.destroy();
+
+                chart = new Chart(newsChart, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: `Number of articles in ${category}`,
+                            data: data.articleCounts,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2
+                        }]
+                    }
+                });
+
+                loadRecentNews(category);
+            } catch (error) {
+                console.error('Error fetching news data:', error);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => loadRecentNews('business'));
+    </script>
+</body>
+</html>

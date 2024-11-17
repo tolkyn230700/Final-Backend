@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/styles.css">
+  <title>Enter 2FA Code</title>
+</head>
+<body>
+  <h2>Enter 2FA Code</h2>
+  <% if (message) { %>
+    <p style="color: red;"><%= message %></p>
+  <% } %>
+  <form action="/2fa" method="post">
+    <label>2FA Code:</label><br>
+    <input type="text" name="twoFactorCode" required><br><br>
+    <button type="submit">Verify</button>
+  </form>
+</body>
+</html>
