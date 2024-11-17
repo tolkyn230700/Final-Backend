@@ -20,7 +20,7 @@ Prerequisites
 __Installation Steps__
 1. Clone the repository:
 ```
-git clone https://github.com/your-username/portfolio-platform.git
+git clone https://github.com/tolkyn230700/Final-Backend.git
 cd portfolio-platform
 ```
 2. Install dependencies:
